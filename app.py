@@ -1,11 +1,14 @@
 from flask import Flask, render_template, jsonify
-from gevent.pywsgi import WSGIServer
+from gevent.pywsgi import WSGIServer  # ✅ Correct import for Render
 import csv
 import random
+import os  # ✅ Added for conditional import
 
 app = Flask(__name__)
 
-CSV_FILE = 'bus_coordinates.csv'
+# Conditionally import 'fcntl' only for non-Windows systems
+if os.name != 'nt':  
+    import fcntl  # ✅ Only import 'fcntl' on non-Windows systems
 
 # Campus boundaries
 CAMPUS_BOUNDS = {
@@ -14,6 +17,8 @@ CAMPUS_BOUNDS = {
     "east": 80.24419665683384,
     "west": 80.22102494207626
 }
+
+CSV_FILE = 'bus_coordinates.csv'
 
 # Load initial data from CSV
 def load_bus_data():
@@ -24,7 +29,6 @@ def load_bus_data():
             for row in reader:
                 bus_data[row['Bus']] = {"lat": float(row['lat']), "lng": float(row['lng'])}
     except FileNotFoundError:
-        # If CSV doesn't exist, initialize default data
         bus_data = {
             "Bus 1": {"lat": 12.995, "lng": 80.233},
             "Bus 2": {"lat": 13.000, "lng": 80.235},
@@ -37,7 +41,7 @@ def load_bus_data():
 def save_bus_data(bus_data):
     with open(CSV_FILE, mode='w', newline='') as file:
         writer = csv.writer(file)
-        writer.writerow(['Bus', 'lat', 'lng'])  # Header
+        writer.writerow(['Bus', 'lat', 'lng'])
         for bus, coords in bus_data.items():
             writer.writerow([bus, coords['lat'], coords['lng']])
 
@@ -54,23 +58,18 @@ def simulate_movement():
         bus_data[bus]["lat"] = new_lat
         bus_data[bus]["lng"] = new_lng
 
-    # Save updated data to CSV
     save_bus_data(bus_data)
 
-# Home route
 @app.route('/')
 def home():
     return render_template('map.html')
 
-# API to provide GPS data
 @app.route('/get_bus_data', methods=['GET'])
 def get_bus_data():
     simulate_movement()
     return jsonify(bus_data)
 
 if __name__ == '__main__':
-    # Load data from CSV when starting the server
     bus_data = load_bus_data()
-
     print("Server running on http://localhost:5000")
     WSGIServer(('0.0.0.0', 5000), app).serve_forever()
