@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>IITM Bus Tracker with Route Planning</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/leaflet.css" />
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+    <h1>IITM Bus Tracker with Route Planning</h1>
+
+    <!-- Start/End Fields in Top-Left Corner -->
+    <div class="controls">
+        <input type="text" id="start" class="input" placeholder="Starting Point" readonly />
+        <input type="text" id="end" class="input" placeholder="Destination" readonly />
+        <button id="cancel-route" style="display: none;">❌ Cancel Route</button>
+    </div>
+
+    <!-- Map Display -->
+    <div id='map'></div>
+
+    <!-- Route Details Display -->
+    <div id="route-details"></div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/leaflet.js"></script>
+    <script src="/static/script.js"></script>
+</body>
+
+</html>
