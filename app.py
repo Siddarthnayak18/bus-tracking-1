@@ -20,9 +20,12 @@ CAMPUS_BOUNDS = {
 
 CSV_FILE = 'bus_coordinates.csv'
 
+# Initialize bus_data globally
+bus_data = {}
+
 # Load initial data from CSV
 def load_bus_data():
-    bus_data = {}
+    global bus_data
     try:
         with open(CSV_FILE, mode='r') as file:
             reader = csv.DictReader(file)
@@ -47,7 +50,7 @@ def save_bus_data(bus_data):
 
 # Simulate random movement within IITM campus
 def simulate_movement():
-    global bus_data  # ✅ Fix scope issue
+    global bus_data
     if not bus_data:  # Ensure `bus_data` is loaded
         bus_data = load_bus_data()
 
@@ -70,12 +73,12 @@ def home():
 
 @app.route('/get_bus_data', methods=['GET'])
 def get_bus_data():
-    global bus_data  # ✅ Fix scope issue
+    global bus_data
     simulate_movement()  # Ensure data is updated
     return jsonify(bus_data)
 
+# Corrected - Removed `global bus_data` in main block
 if __name__ == '__main__':
-    global bus_data  # ✅ Fix scope issue
-    bus_data = load_bus_data()
+    bus_data = load_bus_data()  # ✅ Corrected
     print("Server running on http://localhost:5000")
     WSGIServer(('0.0.0.0', 5000), app).serve_forever()
