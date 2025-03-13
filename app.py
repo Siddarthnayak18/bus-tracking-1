@@ -1,14 +1,14 @@
 from flask import Flask, render_template, jsonify
-from gevent.pywsgi import WSGIServer  # ✅ Correct import for Render
+from gevent.pywsgi import WSGIServer
 import csv
 import random
-import os  # ✅ Added for conditional import
+import os
 
 app = Flask(__name__)
 
 # Conditionally import 'fcntl' only for non-Windows systems
-if os.name != 'nt':  
-    import fcntl  # ✅ Only import 'fcntl' on non-Windows systems
+if os.name != 'nt':
+    import fcntl
 
 # Campus boundaries
 CAMPUS_BOUNDS = {
@@ -47,6 +47,10 @@ def save_bus_data(bus_data):
 
 # Simulate random movement within IITM campus
 def simulate_movement():
+    global bus_data  # ✅ Fix scope issue
+    if not bus_data:  # Ensure `bus_data` is loaded
+        bus_data = load_bus_data()
+
     for bus in bus_data:
         new_lat = bus_data[bus]["lat"] + random.uniform(-0.000005, 0.000005)
         new_lng = bus_data[bus]["lng"] + random.uniform(-0.000005, 0.000005)
@@ -66,10 +70,12 @@ def home():
 
 @app.route('/get_bus_data', methods=['GET'])
 def get_bus_data():
-    simulate_movement()
+    global bus_data  # ✅ Fix scope issue
+    simulate_movement()  # Ensure data is updated
     return jsonify(bus_data)
 
 if __name__ == '__main__':
+    global bus_data  # ✅ Fix scope issue
     bus_data = load_bus_data()
     print("Server running on http://localhost:5000")
     WSGIServer(('0.0.0.0', 5000), app).serve_forever()
